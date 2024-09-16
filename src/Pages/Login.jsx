@@ -1,9 +1,10 @@
 import { MDBBtn, MDBInput } from 'mdb-react-ui-kit'
 import React, { useState } from 'react'
 import googleIcon from '../Images/Google_Icon.png'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase/configure'
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
+import { auth, db } from '../firebase/configure'
 import { useNavigate } from 'react-router-dom'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 
 
@@ -26,6 +27,30 @@ function Login() {
         }
     }
 
+
+    const handleGoogle = async ()=>{
+      try{
+        const provider =new GoogleAuthProvider()
+        const result = await signInWithPopup(auth,provider)
+        const user = result.user
+        const docRef = doc(db,"users",user.uid)
+        const docSnap =await getDoc(docRef)
+        const data = docSnap.data()
+        if(!data){
+          await setDoc(doc(db,"users",user.uid),{
+              name:user.displayName,
+              avatar:user.photoURL,
+              email:user.email,
+              password,
+              content:[]
+          })
+        }
+        navigate("/dashboard")
+      }catch(error){
+        alert(error.message)
+      }
+  }
+
   return (
     <>
       <div className="main d-flex justify-content-center align-items-center" style={{height:"100vh",backgroundColor:"rgb(220,250,250"}}>
@@ -41,7 +66,7 @@ function Login() {
                 <div className="border w-100 my-5"></div>
                 <span className='position-absolute bg-light px-3 text-bold'>OR</span>
             </div>
-            <MDBBtn size='lg' color='light' className='w-100 border-2 border mb-4'><img  src={googleIcon} className='me-3' height={"20px"} alt="" />Continue with google</MDBBtn>
+            <MDBBtn size='lg' color='light' className='w-100 border-2 border mb-4' onClick={handleGoogle}><img  src={googleIcon} className='me-3' height={"20px"} alt="" />Continue with google</MDBBtn>
         </div>
       </div>
     </>

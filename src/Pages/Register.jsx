@@ -1,11 +1,10 @@
 import { MDBBtn, MDBInput } from 'mdb-react-ui-kit'
 import React, { useState } from 'react'
 import googleIcon from '../Images/Google_Icon.png'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { auth, db } from '../firebase/configure'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
-
 
 
 function Register() {
@@ -14,7 +13,9 @@ function Register() {
     const[password,setPassword]=useState('')
     const[name,setName]=useState('')
 
+    
     const navigate = useNavigate()
+
 
     const handleRegister=async ()=>{
         try{
@@ -24,7 +25,6 @@ function Register() {
             }
             await createUserWithEmailAndPassword(auth,email,password)
             const user = auth.currentUser
-            console.log(user);
             if(user){
                 await setDoc(doc(db,"users",user.uid),{
                     name,email,password,content:[]
@@ -34,6 +34,31 @@ function Register() {
             navigate("/login")
         }catch(error){
             alert(error.message.slice(error.message.indexOf("(")+6,error.message.indexOf(")")))
+        }
+    }
+
+
+
+    const handleGoogle = async ()=>{
+        try{
+          const provider =new GoogleAuthProvider()
+          const result = await signInWithPopup(auth,provider)
+          const user = result.user
+          const docRef = doc(db,"users",user.uid)
+          const docSnap =await getDoc(docRef)
+          const data = docSnap.data()
+          if(!data){
+            await setDoc(doc(db,"users",user.uid),{
+                name:user.displayName,
+                avatar:user.photoURL,
+                email:user.email,
+                password,
+                content:[]
+            })
+          }
+          navigate("/dashboard")
+        }catch(error){
+          alert(error.message)
         }
     }
 
@@ -53,7 +78,7 @@ function Register() {
                     <div className="border w-100 my-5"></div>
                     <span className='position-absolute bg-light px-3 text-bold'>OR</span>
                 </div>
-                <MDBBtn size='lg' color='light' className='w-100 border-2 border mb-4'><img  src={googleIcon} className='me-3' height={"20px"} alt="" />Continue with google</MDBBtn>
+                <MDBBtn size='lg' color='light' className='w-100 border-2 border mb-4' onClick={handleGoogle}><img  src={googleIcon} className='me-3' height={"20px"} alt="" />Continue with google</MDBBtn>
             </div>
         </div>
     </>

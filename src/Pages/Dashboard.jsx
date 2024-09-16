@@ -44,7 +44,7 @@ function Dashboard() {
       <div className="main position-relative d-flex justify-content-center align-items-center" style={{height:"100vh",backgroundColor:"rgb(220,250,250"}}>
         <div className="container bg-light rounded-5 shadow-lg px-5 pb-2 d-flex flex-column align-items-center" style={{width:"33%",minWidth:"380px"}}>
             <div className="image my-5 mb-3" style={{width:"320px",aspectRatio:"1/1"}}>
-                <img src={user?user.avatar?user.avatar:avatar:avatar} width={"100%"} height={"100%"} alt="" />
+                <img src={user?user.avatar?user.avatar:avatar:avatar} width={"100%"} height={"100%"} style={{borderRadius:"50%"}} alt="" />
             </div>
             <h3>{user?user.name:"Name"}</h3>
             <p>{user?user.email:"Name"}</p>
